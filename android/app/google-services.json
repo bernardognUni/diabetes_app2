@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "851077372449",
+    "project_id": "diabetes-app-59777",
+    "storage_bucket": "diabetes-app-59777.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851077372449:android:2a1cfa4e70f5ef9bfba160",
+        "android_client_info": {
+          "package_name": "com.example.diabetes_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8N6b8OGEa01GyAkvDuT1cujMfGURU5yA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851077372449:android:8873a399de6960a0fba160",
+        "android_client_info": {
+          "package_name": "com.example.diabetes_app2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8N6b8OGEa01GyAkvDuT1cujMfGURU5yA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
