@@ -35,24 +35,70 @@ class _RemedioScreenState extends State<RemedioScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const Text('Data de consumo:', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
+          const Text(
+            'Data de consumo:',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
+          ),
           const SizedBox(height: 8),
-          _boxed(Row(children: [
-            Expanded(child: Text(_fmt(data), style: const TextStyle(fontSize: 18))),
-            IconButton(icon: const Icon(Icons.calendar_today_outlined), onPressed: () async {
-              final d = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2100), initialDate: data);
-              if (d == null) return;
-              final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(data));
-              setState(()=> data = DateTime(d.year,d.month,d.day,t!.hour,t.minute));
-            })
-          ])),
+          _boxed(
+            Row(
+              children: [
+                Expanded(
+                  child: Text(_fmt(data), style: const TextStyle(fontSize: 18)),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.calendar_today_outlined),
+                  onPressed: () async {
+                    final d = await showDatePicker(
+                      context: context,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      initialDate: data,
+                    );
+                    if (d == null) return;
+                    final t = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(data),
+                    );
+                    setState(
+                      () => data = DateTime(
+                        d.year,
+                        d.month,
+                        d.day,
+                        t!.hour,
+                        t.minute,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 10),
 
-          _boxed(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Tipo:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-            RadioListTile(value: 'Insulina', groupValue: tipo, onChanged: (v)=> setState(()=> tipo=v), title: const Text('Insulina')),
-            RadioListTile(value: 'Medicação oral', groupValue: tipo, onChanged: (v)=> setState(()=> tipo=v), title: const Text('Medicação oral')),
-          ])),
+          _boxed(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tipo:',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
+                RadioListTile(
+                  value: 'Insulina',
+                  groupValue: tipo,
+                  onChanged: (v) => setState(() => tipo = v),
+                  title: const Text('Insulina'),
+                ),
+                RadioListTile(
+                  value: 'Medicação oral',
+                  groupValue: tipo,
+                  onChanged: (v) => setState(() => tipo = v),
+                  title: const Text('Medicação oral'),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 10),
 
           Row(
@@ -64,21 +110,24 @@ class _RemedioScreenState extends State<RemedioScreen> {
                       if (textEditingValue.text.isEmpty) {
                         return const Iterable<Map<String, String>>.empty();
                       }
-                      return medicamentosComuns.where((med) => 
-                        med['nome']!.toLowerCase().contains(textEditingValue.text.toLowerCase())
-                      );
-                    },
-                    displayStringForOption: (opt) => opt['nome']!,
-                    fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-                      return TextField(
-                        controller: textController,
-                        focusNode: focusNode,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Nome do medicamento',
+                      return medicamentosComuns.where(
+                        (med) => med['nome']!.toLowerCase().contains(
+                          textEditingValue.text.toLowerCase(),
                         ),
                       );
                     },
+                    displayStringForOption: (opt) => opt['nome']!,
+                    fieldViewBuilder:
+                        (context, textController, focusNode, onFieldSubmitted) {
+                          return TextField(
+                            controller: textController,
+                            focusNode: focusNode,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Nome do medicamento',
+                            ),
+                          );
+                        },
                     onSelected: (Map<String, String> medicamento) {
                       nome.text = medicamento['nome']!;
                       dosagem.text = medicamento['dosagem']!;
@@ -108,13 +157,15 @@ class _RemedioScreenState extends State<RemedioScreen> {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _boxed(TextField(
-                  controller: dosagem,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Dosagem (unidades/mg)',
+                child: _boxed(
+                  TextField(
+                    controller: dosagem,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Dosagem (unidades/mg)',
+                    ),
                   ),
-                )),
+                ),
               ),
             ],
           ),
@@ -124,9 +175,13 @@ class _RemedioScreenState extends State<RemedioScreen> {
             final auth = context.read<AuthService>();
             final fs = context.read<FirestoreService>();
 
-            if (nome.text.trim().isEmpty || dosagem.text.trim().isEmpty || tipo == null) {
+            if (nome.text.trim().isEmpty ||
+                dosagem.text.trim().isEmpty ||
+                tipo == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Preencha todos os campos antes de salvar.')),
+                const SnackBar(
+                  content: Text('Preencha todos os campos antes de salvar.'),
+                ),
               );
               return;
             }
@@ -142,7 +197,9 @@ class _RemedioScreenState extends State<RemedioScreen> {
             dosagem.clear();
             tipo = null;
             setState(() {});
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medicação salva com sucesso!')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Medicação salva com sucesso!')),
+            );
           }),
         ],
       ),

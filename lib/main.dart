@@ -1,13 +1,13 @@
 import 'package:diabetes_app2/screens/alerts/alerts_form_screen.dart';
 import 'package:diabetes_app2/screens/alerts/alerts_list_screen.dart';
 import 'package:diabetes_app2/screens/graficos/exportacao_screen.dart';
-//import 'package:diabetes_app2/screens/graficos/grafico_screen.dart';
 import 'package:diabetes_app2/screens/graficos/graficos_screen.dart';
 import 'package:diabetes_app2/screens/perfil/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
@@ -37,6 +37,16 @@ class DiabetesApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Diabetes APP',
         debugShowCheckedModeBanner: false,
+
+        // Para poder definir as datas do DatePicker(calendários) em pt-br precisa dessa config
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+
         theme: ThemeData(
           fontFamily: 'Poppins',
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3D5AFE)),
@@ -57,7 +67,7 @@ class DiabetesApp extends StatelessWidget {
           '/home': (context) => const HomeScreen(),
           '/perfil': (context) => const ProfileScreen(),
           '/alertas': (context) => const AlertsListScreen(),
-          '/login': (context)=> const LoginScreen(),
+          '/login': (context) => const LoginScreen(),
           '/alertas/novo': (context) => const AlertsFormScreen(),
           '/graficos': (context) => const GraficosScreen(),
           '/exportacao': (context) => const ExportacaoScreen(),

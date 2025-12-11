@@ -34,6 +34,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool bsUtiliza = false;
   final bsNome = TextEditingController();
 
+  // META GLICÊMICA calculada automaticamente
+  int? metaMin;
+  int? metaMax;
+
   final cpfMask = MaskTextInputFormatter(
     mask: '###.###.###-##',
     filter: {"#": RegExp(r'[0-9]')},
@@ -56,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     nome.dispose();
-    //sobrenome.dispose();
     nomeMae.dispose();
     dataNasc.dispose();
     telefone.dispose();
@@ -66,6 +69,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
     confirmar.dispose();
     bsNome.dispose();
     super.dispose();
+  }
+
+  void atualizarMetas() {
+    if (tipoDiabetes == null) return;
+    if (dataNasc.text.length != 10) return;
+
+    try {
+      final p = dataNasc.text.split('/');
+      final birthDate = DateTime(
+        int.parse(p[2]),
+        int.parse(p[1]),
+        int.parse(p[0]),
+      );
+
+      final metas = calcularMetas(tipoDiabetes!, birthDate);
+
+      setState(() {
+        metaMin = metas['min'];
+        metaMax = metas['max'];
+      });
+    } catch (_) {
+      // Serve para ignorar erro de data incompleta
+    }
+  }
+
+  Future<void> pickBirthDate() async {
+    final now = DateTime.now();
+    final d = await showDatePicker(
+      context: context,
+      firstDate: DateTime(1900),
+      lastDate: now,
+      initialDate: now,
+    );
+
+    if (d != null) {
+      final formatted =
+          '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}';
+      setState(() => dataNasc.text = formatted);
+      atualizarMetas(); // Serve para atualizar automaticamente as metas glicêmicas já dentro dessa tela (colocar todos os valores de acordo com as metas da SDB - Sociedade Brasileira de Diabetes)
+    }
+  }
+
+  Map<String, int> calcularMetas(String tipoDiabetes, DateTime birthDate) {
+    final hoje = DateTime.now();
+    int idade = hoje.year - birthDate.year;
+
+    if (hoje.month < birthDate.month ||
+        (hoje.month == birthDate.month && hoje.day < birthDate.day)) {
+      idade--;
+    }
+
+    if (tipoDiabetes == 'Gestacional') {
+      return {'min': 70, 'max': 95};
+    }
+
+    if (idade >= 75) {
+      return {'min': 100, 'max': 150};
+    }
+
+    if (idade < 18) {
+      return {'min': 90, 'max': 150};
+    }
+
+    return {'min': 80, 'max': 130};
   }
 
   @override
@@ -107,7 +174,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: dataNasc,
                 keyboardType: TextInputType.number,
                 inputFormatters: [dataMask],
-                suffix: const Icon(Icons.calendar_today_outlined),
+                onChanged: (_) => atualizarMetas(),
+                suffix: IconButton(
+                  icon: const Icon(Icons.calendar_today_outlined),
+                  onPressed: pickBirthDate,
+                ),
               ),
               const SizedBox(height: 10),
 
@@ -131,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const Text( // o código do gênero é diferente por ser por seleção e não escrita igual os demais dados
                       'Gênero:',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
@@ -173,17 +244,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _radio(
                           'Tipo 1',
                           tipoDiabetes,
-                          (v) => setState(() => tipoDiabetes = v),
+                          (v) {
+                            setState(() => tipoDiabetes = v);
+                            atualizarMetas();
+                          },
                         ),
                         _radio(
                           'Tipo 2',
                           tipoDiabetes,
-                          (v) => setState(() => tipoDiabetes = v),
+                          (v) {
+                            setState(() => tipoDiabetes = v);
+                            atualizarMetas();
+                          },
                         ),
                         _radio(
                           'Gestacional',
                           tipoDiabetes,
-                          (v) => setState(() => tipoDiabetes = v),
+                          (v) {
+                            setState(() => tipoDiabetes = v);
+                            atualizarMetas();
+                          },
                         ),
                       ],
                     ),
@@ -199,21 +279,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Wrap(
                       spacing: 8,
                       children: [
+                        _radio('Básico', nivel, (v) => setState(() => nivel = v)),
+                        _radio('Intermediário', nivel,
+                            (v) => setState(() => nivel = v)),
                         _radio(
-                          'Básico',
-                          nivel,
-                          (v) => setState(() => nivel = v),
-                        ),
-                        _radio(
-                          'Intermediário',
-                          nivel,
-                          (v) => setState(() => nivel = v),
-                        ),
-                        _radio(
-                          'Avançado',
-                          nivel,
-                          (v) => setState(() => nivel = v),
-                        ),
+                            'Avançado', nivel, (v) => setState(() => nivel = v)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -234,7 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     if (bsUtiliza)
                       InputField(
-                        hint: 'Nome do UBS/Sistema',
+                        hint: 'Nome do UBS/Sistema', // aqui é interessante colocar um autocomplete igual ao dos medicamentos para as UBS existentes na cidade
                         controller: bsNome,
                         inputFormatters: [apenasLetras],
                       ),
@@ -256,9 +326,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscure: senhaHide,
                 suffix: IconButton(
                   onPressed: () => setState(() => senhaHide = !senhaHide),
-                  icon: Icon(
-                    senhaHide ? Icons.visibility : Icons.visibility_off,
-                  ),
+                  icon:
+                      Icon(senhaHide ? Icons.visibility : Icons.visibility_off),
                 ),
               ),
               const SizedBox(height: 10),
@@ -271,8 +340,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () =>
                       setState(() => confirmarHide = !confirmarHide),
                   icon: Icon(
-                    confirmarHide ? Icons.visibility : Icons.visibility_off,
-                  ),
+                      confirmarHide ? Icons.visibility : Icons.visibility_off),
                 ),
               ),
               const SizedBox(height: 14),
@@ -281,10 +349,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 'Meta glicemia jejum:',
                 style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
               ),
-              const Text(
-                '80–180 mg/dL',
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-              ),
+
+              if (metaMin == null || metaMax == null)
+                const Text(
+                  'Preencha data de nascimento e tipo de diabetes',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                )
+              else
+                Text(
+                  '$metaMin – $metaMax mg/dL',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+
               const SizedBox(height: 14),
 
               PrimaryButton(
@@ -296,6 +376,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     );
                     return;
                   }
+
+                  DateTime birthDate;
+                  try {
+                    final partes = dataNasc.text.split('/');
+                    birthDate = DateTime(
+                      int.parse(partes[2]),
+                      int.parse(partes[1]),
+                      int.parse(partes[0]),
+                    );
+                  } catch (_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Data de nascimento inválida')),
+                    );
+                    return;
+                  }
+
+                  // Serve para o calculdo das metas glicemicas automaticamente
+                  final metas = calcularMetas(tipoDiabetes ?? 'Tipo 2', birthDate);
+                  final metaMinFinal = metas['min']!;
+                  final metaMaxFinal = metas['max']!;
 
                   try {
                     await context.read<AuthService>().signUp(
@@ -319,8 +419,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       'nivelConhecimento': nivel ?? 'Básico',
                       'bsUtiliza': bsUtiliza,
                       'bsNome': bsNome.text.trim(),
-                      'metaJejumMin': 80,
-                      'metaJejumMax': 180,
+                      'metaJejumMin': metaMinFinal,
+                      'metaJejumMax': metaMaxFinal,
                     });
 
                     if (!mounted) return;
@@ -330,12 +430,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       (_) => false,
                     );
                   } catch (e) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text('Erro: $e')));
                   }
                 },
               ),
+
               const SizedBox(height: 12),
 
               PrimaryButton(
@@ -354,22 +454,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String label,
     String? group,
     void Function(String?) onChanged,
-  ) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Radio<String>(value: label, groupValue: group, onChanged: onChanged),
-      Text(label),
-    ],
-  );
+  ) =>
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String>(value: label, groupValue: group, onChanged: onChanged),
+          Text(label),
+        ],
+      );
 
   Widget _boxed({required Widget child}) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.black, width: 1),
-    ),
-    child: child,
-  );
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: child,
+      );
 }

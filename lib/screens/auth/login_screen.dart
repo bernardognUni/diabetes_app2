@@ -29,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 24),
               Image.asset('assets/imgs/robot.png', width: 220),
-              const SizedBox(height: 12),
+              const SizedBox(height: 12), //adicionar ideia da Profa. Letícia de colocar um balão de texto como se fosse uma fala do robô(logo)
+              //                            e um tutorial do app ao entrar pelas primeiras vezes.
               const Text('Diabetes Tracker', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white)),
               const SizedBox(height: 24),
               InputField(hint: 'e-mail ou CPF', controller: email),

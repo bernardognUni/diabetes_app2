@@ -25,7 +25,8 @@ class NotificationsService {
   }) async {
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
-        'lembretes', 'Lembretes',
+        'lembretes',
+        'Lembretes',
         importance: Importance.max,
         priority: Priority.high,
         playSound: sound,

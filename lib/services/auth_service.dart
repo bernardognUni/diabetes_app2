@@ -16,9 +16,11 @@ class AuthService extends ChangeNotifier {
     await _auth.createUserWithEmailAndPassword(email: email, password: senha);
   }
 
-  Future<void> resetPassword(String email) => _auth.sendPasswordResetEmail(email: email);
+  Future<void> resetPassword(String email) =>
+      _auth.sendPasswordResetEmail(email: email);
 
   Future<void> signOut() => _auth.signOut();
 
-  static AuthService of(BuildContext context) => Provider.of<AuthService>(context, listen: false);
+  static AuthService of(BuildContext context) =>
+      Provider.of<AuthService>(context, listen: false);
 }
